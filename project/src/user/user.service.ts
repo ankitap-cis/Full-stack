@@ -43,6 +43,7 @@ export class UserService {
     user.username = updateUserDto.username;
     user.password = updateUserDto.password;
     user.id = id;
+    user.gender=updateUserDto.gender;
     return this.userRepository.save(user);
   }
 
