@@ -20,11 +20,11 @@ import { HttpStatus } from '@nestjs/common';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
-  
+
   @Post('/register')
- @UsePipes( new ValidationPipe({whitelist :true}))
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
@@ -43,7 +43,7 @@ export class UserController {
 
   // @UseGuards(AuthGuard)
   @Patch(':id')
-  @UsePipes(new ValidationPipe({whitelist: true}))
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }

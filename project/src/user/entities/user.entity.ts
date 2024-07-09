@@ -1,3 +1,4 @@
+import { IsStrongPassword } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -18,7 +19,8 @@ export class Users {
   @Column({ type: 'int' })
   age: number;
 
-  @Column({ type: 'varchar' }) 
+  @Column({ type: 'varchar' })  
+  @IsStrongPassword()
   password: string;
 
   @Column({ type: 'enum', enum: ['m', 'f', 'u'] })
