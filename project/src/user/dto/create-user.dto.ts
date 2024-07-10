@@ -9,6 +9,7 @@ import {
     MinLength,
     IsStrongPassword
   } from 'class-validator';
+import { Role } from 'src/roles/enum';
   
   
   
@@ -37,4 +38,6 @@ import {
     @IsNotEmpty()
     @IsStrongPassword()
     password: string;
+
+    role: Role;
   }

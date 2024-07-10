@@ -1,4 +1,6 @@
 import { IsStrongPassword } from 'class-validator';
+import { Roles } from 'src/roles/decorator';
+import { Role } from 'src/roles/enum';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -23,7 +25,9 @@ export class Users {
   @IsStrongPassword()
   password: string;
 
-  @Column({ type: 'enum', enum: ['m', 'f', 'u'] })
- 
-  gender: string;
+  @Column({ type: 'enum', enum: ["m", "f", "u"] })
+  gender:string;
+
+  @Column({default:Role.User})
+  roles:Role;
 }

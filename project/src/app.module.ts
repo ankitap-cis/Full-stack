@@ -10,6 +10,7 @@ import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import {ConfigModule} from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './roles/guard';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { AuthModule } from './auth/auth.module';
   }),
   UserModule,
   AuthModule,
-  PassportModule,
+  // PassportModule,
   
 ],
   controllers: [AppController],
@@ -38,6 +39,10 @@ import { AuthModule } from './auth/auth.module';
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    },  
     AppService
   ],
 })
