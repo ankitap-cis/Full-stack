@@ -1,48 +1,50 @@
+
 import {
-    CanActivate,
-    ExecutionContext,
-    Injectable,
-    UnauthorizedException,
-  } from '@nestjs/common';
-  import { JwtService } from '@nestjs/jwt';
-  import { jwtConstants } from './constant';
-  import { Request } from 'express';
-import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from '../auth/constant';
+import { Request } from 'express';
 
 
- @Injectable()
-  export class AuthGuard implements CanActivate {
-    constructor(private jwtService: JwtService, private reflector: Reflector) {}
-  
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY,[
-            context.getHandler(),
-            context.getClass(),
-        ]);
-      if(isPublic){
-        return true;
-      }
+@Injectable()
+export class AuthGuard implements CanActivate {
+  constructor(private jwtService: JwtService) {}
 
-      const request = context.switchToHttp().getRequest();
-      const token = this.extractTokenFromHeader(request);
-      if (!token) {
-        throw new UnauthorizedException();
-      }
-      try {
-        const payload = await this.jwtService.verifyAsync(token,{
-            secret: jwtConstants.secret
-        });
-       
-        request['user'] = payload;
-      } catch {
-        throw new UnauthorizedException();
-      }
-      return true;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log("jgjvgjvgvgj");
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
+    console.log('Extracted Token: ',token);
+    if (!token) {
+      throw new UnauthorizedException();
     }
-  
-    private extractTokenFromHeader(request: Request): string | undefined {
-      const [type, token] = request.headers.authorization?.split(' ') ?? [];
-      return type === 'Bearer' ? token : undefined;
+    try {
+      const payload = await this.jwtService.verifyAsync(
+        token,
+        {
+          secret: jwtConstants.secret
+        }
+      );
+
+      console.log('Token Payload',payload);
+      // 💡 We're assigning the payload to the request object here
+      // so that we can access it in our route handlers
+      request['user'] = payload;
+    } catch(error){
+      console.error('Token Verification Error', error);
+      throw new UnauthorizedException('Invalid token');
     }
+    return true;
   }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const authHeader= request.headers.authorisation;
+    console.log('Authorisation Header:', request.headers.authorization)
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
+  }
+}

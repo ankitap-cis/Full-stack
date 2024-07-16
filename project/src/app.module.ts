@@ -10,7 +10,7 @@ import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import {ConfigModule} from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from './auth/auth.module';
-import { RolesGuard } from './roles/guard';
+import { RolesGuard } from './roles/role.guard';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { RolesGuard } from './roles/guard';
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
+      useClass: RolesGuard,
     },  
     AppService
   ],

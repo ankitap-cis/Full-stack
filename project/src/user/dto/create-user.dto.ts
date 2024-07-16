@@ -9,7 +9,7 @@ import {
     MinLength,
     IsStrongPassword
   } from 'class-validator';
-import { Role } from 'src/roles/enum';
+// import { Role } from 'src/roles/enum';
   
   
   
@@ -18,6 +18,7 @@ import { Role } from 'src/roles/enum';
     @MinLength(2, { message: 'Name must have atleast 2 characters.' })
     @IsNotEmpty()
     name: string;
+    
   
     @IsNotEmpty()
     @MinLength(3, { message: 'Username must have atleast 3 characters.' })
@@ -39,5 +40,7 @@ import { Role } from 'src/roles/enum';
     @IsStrongPassword()
     password: string;
 
-    role: Role;
+    role: string;
+
+    
   }

@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Users } from './entities/user.entity';
 import { log } from 'console';
+import { JwtPayload } from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -17,26 +18,27 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto) {
     const newUser: Users = this.userRepository.create(createUserDto);
     const savedUser: Users = await this.userRepository.save(newUser);
-   // console.log(newUser);
+    // console.log(newUser);
     const { password, ...result } = savedUser;
     return { message: "User created successfully" }
   }
 
-async findOne(id: string): Promise<Users> {
-  const user = await this.userRepository.findOneBy( {id} );
-  if (!user) {
-    throw new NotFoundException(`User with ID ${id} not found`);
+  async findOne(id: string): Promise<Users> {
+    const user = await this.userRepository.findOneBy({ id });
+    // console.log("🚀 ~ UserService ~ findOne ~ user:", user)
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
-  return user;
-}
 
-async findOneByUsername(username: string): Promise<Users> {
-  const user = await this.userRepository.findOne({where:{username}});
-  if (!user) {
-    throw new NotFoundException(`User with username ${username} not found`);
+  async findOneByUsername(username: string): Promise<Users> {
+    const user = await this.userRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+    return user;
   }
-  return user;
-}
 
 
   findAllUser(): Promise<Users[]> {
@@ -63,9 +65,20 @@ async findOneByUsername(username: string): Promise<Users> {
   }
 
 
-
-  removeUser(id: number): Promise<{ affected?: number }> {
+  async removeUser(id: string): Promise<{ affected?: number }> {
+    const getId = this.findOne(id);
+    console.log(getId);
     return this.userRepository.delete(id);
+  }
+  
+  async validateUserByJwt(payload: JwtPayload): Promise<Users | null>{
+     const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+    });
+    if (!user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    return user;
   }
 }
 

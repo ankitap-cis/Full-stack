@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from '../user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
+
 
 @Injectable()
 export class AuthService {
@@ -14,11 +16,13 @@ export class AuthService {
 
     async signIn(username: string, pass: string): Promise<{access_token :string}> {
         const user = await this.usersService.findOneByUsername(username);
-        if (user?.password !== pass) {
-            throw new UnauthorizedException();
-        }
+        console.log(user);
 
-        const payload = {sub: user.id, username: user.username};
+        // if (user?.password !== pass) {
+        //     throw new UnauthorizedException();
+        // }
+        const isPasswordValid = await bcrypt.compare(pass, user.password);
+        const payload = {sub: user.id, username: user.username, email:user.email};
         return {
             access_token: await this.jwtService.signAsync(payload),
         }

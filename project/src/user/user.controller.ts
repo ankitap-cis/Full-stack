@@ -14,11 +14,9 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { HttpException } from '@nestjs/common';
-import { HttpStatus } from '@nestjs/common';
-import { Roles } from 'src/roles/decorator';
-import { Role } from 'src/roles/enum';
-import { Users } from './entities/user.entity';
+import { RolesGuard } from 'src/roles/role.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { AuthGuard } from 'src/auth/auth-guard';
 
 
 @Controller('user')
@@ -32,34 +30,31 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 
-  // @UseGuards(AuthGuard)
   @Get('/getuser')
-  @Roles(Role.Admin)
+  // @Roles('admin')
   async findAll() {
     return this.userService.findAllUser();
   }
 
-  // @UseGuards(AuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: string) {
     return this.userService.viewUser(id);
   }
 
-  // @UseGuards(AuthGuard)
+  @UseGuards(RolesGuard)
   @Patch(':id')
   @UsePipes(new ValidationPipe({ whitelist: true }))
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
-  // @UseGuards(AuthGuard)
+   @UseGuards(RolesGuard)
   @Delete(':id')
-  //@Roles(Role.Admin)
   remove(@Param('id', ParseIntPipe) id: string) {
-    return this.userService.removeUser(+id);
+    console.log(id);
+    console.log(`User ${id} deleted`);
+    return this.userService.removeUser(id);
   }
 }
 
-function RequirePermissions(CREATE_USER: any): (target: UserController, propertyKey: "create", descriptor: TypedPropertyDescriptor<(createUserDto: CreateUserDto) => Promise<{ message: string; }>>) => void | TypedPropertyDescriptor<any> {
-  throw new Error('Function not implemented.');
-}
+
