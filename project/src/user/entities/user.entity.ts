@@ -34,6 +34,13 @@ export class Users {
   @Column({default:'user'})
   roles:string;
 
+
+  @Column({default: false})
+  isVerified : boolean;
+
+  @Column({nullable:true})
+  verificationToken:string;
+
   @BeforeInsert()
   async hashPasswordAndValidate() {
     this.password = await bcrypt.hash(this.password, 8);

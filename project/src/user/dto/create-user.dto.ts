@@ -40,6 +40,7 @@ import {
     @IsStrongPassword()
     password: string;
 
+
     role: string;
 
     

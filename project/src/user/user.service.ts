@@ -1,17 +1,23 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Users } from './entities/user.entity';
-import { log } from 'console';
 import { JwtPayload } from 'jsonwebtoken';
+import * as bcrypt from 'bcrypt';
+import {MailerService} from '../mailer/mailer.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
 
   constructor(
-    @InjectRepository(Users) private readonly userRepository: Repository<Users>,
+    @InjectRepository(Users) 
+    private readonly userRepository: Repository<Users>,
+    private readonly jwtService:JwtService,
+    private readonly mailerService: MailerService,
+                             
   ) { }
 
 
@@ -78,6 +84,46 @@ export class UserService {
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
+    return user;
+  }
+
+  async register(createUserDto: CreateUserDto): Promise<void> {
+    const userExists = await this.userRepository.findOne({ where: { email: createUserDto.email } });
+    if (userExists) {
+      throw new ConflictException('Email already in use');
+    }
+
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const verificationToken = this.jwtService.sign({ email: createUserDto.email });
+
+    const user = this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+      verificationToken,
+      isVerified: false,
+    });
+
+    await this.userRepository.save(user);
+    await this.mailerService.sendVerificationEmail(user.email, verificationToken);
+  }
+
+  async verifyEmail(token: string): Promise<Users> {
+    const { email } = this.jwtService.verify(token);
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.verificationToken !== token) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    user.isVerified = true;
+    user.verificationToken = null;
+
+    await this.userRepository.save(user);
+
     return user;
   }
 }

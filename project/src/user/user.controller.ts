@@ -17,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from 'src/roles/role.guard';
 import { Roles } from 'src/roles/roles.decorator';
 import { AuthGuard } from 'src/auth/auth-guard';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 
 @Controller('user')
@@ -29,6 +30,23 @@ export class UserController {
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
+
+
+  @Post('/registeruser')
+  //@UsePipes(new ValidationPipe({ whitelist: true }))
+ async register(@Body() createUserDto: CreateUserDto) {
+    return this.userService.register(createUserDto);
+  }
+   
+ 
+  @Post('verify')
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    const user = await this.userService.verifyEmail(verifyEmailDto.token);
+    // Redirect to login page with user's data
+    return { message: 'User verified', user };
+  }
+
+
 
   @Get('/getuser')
   // @Roles('admin')
@@ -49,12 +67,15 @@ export class UserController {
   }
 
    @UseGuards(RolesGuard)
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: string) {
+   @Delete(':id')
+   remove(@Param('id', ParseIntPipe) id: string) {
     console.log(id);
     console.log(`User ${id} deleted`);
     return this.userService.removeUser(id);
   }
+
+  
+
 }
 
 

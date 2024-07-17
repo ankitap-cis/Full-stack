@@ -6,14 +6,19 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { UserModule } from './user/user.module';
 import { Users } from './user/entities/user.entity';
 import { APP_GUARD, APP_PIPE } from '@nestjs/core';
-// import { AuthModule } from './auth/auth.module';
 import {ConfigModule} from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
 import { AuthModule } from './auth/auth.module';
 import { RolesGuard } from './roles/role.guard';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { UserService } from './user/user.service';
+
+
 
 @Module({
   imports: [
+  TypeOrmModule.forFeature([Users]),
   TypeOrmModule.forRoot({
     type : 'postgres',
     host : 'localhost',
@@ -25,11 +30,33 @@ import { RolesGuard } from './roles/role.guard';
     synchronize: true,
 
   }),
+  MailerModule.forRoot({
+    transport: {
+      host: 'smtp.example.com',
+      port: 587,
+      auth: {
+        user: 'user@example.com',
+        pass: 'password',
+      },
+    },
+    defaults: {
+      from: '"No Reply" <noreply@example.com>',
+    },
+    template: {
+      dir: join(__dirname, 'templates'),
+      adapter: new HandlebarsAdapter(),
+      options: {
+        strict: true,
+      },
+    },
+  }),
   ConfigModule.forRoot({
     isGlobal: true,
   }),
   UserModule,
   AuthModule,
+  
+  
   // PassportModule,
   
 ],
@@ -43,7 +70,9 @@ import { RolesGuard } from './roles/role.guard';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },  
-    AppService
+    AppService,
+    UserService,
+  
   ],
 })
 export class AppModule implements NestModule{
