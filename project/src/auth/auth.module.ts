@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constant';
 import { UserService } from 'src/user/user.service';
 import { MailerService } from 'src/mailer/mailer.service';
+import { MailerModule } from 'src/mailer/mailer.module';
 
 
 @Module({
@@ -18,7 +19,7 @@ import { MailerService } from 'src/mailer/mailer.service';
       secret: jwtConstants.secret,
       signOptions: {expiresIn: '1500s'},
     }),
-    
+    MailerModule
   ],
   providers: [AuthService,UserService, MailerService],
   controllers: [AuthController],

@@ -16,6 +16,7 @@ JwtModule.register({
   signOptions:{expiresIn:'1d'},
  
 }),
+MailerModule
 ],
   
   controllers: [UserController],

@@ -6,11 +6,11 @@ import { MailerService } from './mailer.service';
   imports: [
     NestMailerModule.forRoot({
       transport: {
-        host: 'smtp.your-email-provider.com',
+        host: 'smtp.gmail.com',
         port: 587,
         auth: {
-          user: 'your-email',
-          pass: 'your-password',
+          user: 'ankita.p@cisinlabs.com',
+          pass: 'ttjkvulqjneaxtqc',
         },
       },
     }),

@@ -8,7 +8,7 @@ export class MailerService {
   async sendVerificationEmail(email: string, token: string) {
     const url = `http://localhost:3000/${token}`;
     await this.mailerService.sendMail({
-      from: email,
+      from: 'ankita.p@cisinlabs.com',
       to: email,
       subject: 'Verify Your Email',
       text: `Click on this link to verify your email: ${url}`,
